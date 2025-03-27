@@ -49,21 +49,24 @@ class ValorantPlayer:
             return None
 
         matches = matches_data.get("data", [])
+        total_matches = 0
 
         for match in matches:
             mode = match["meta"]["mode"]
-            if mode == "Competitive" and len(self.competitive_matches_id) < 10:
-                self.competitive_matches_id.append(match["meta"]["id"])
-                self.match_stats.update_stats(match)
+            match_id = match["meta"]["id"]
 
-        for match in matches:
-            mode = match["meta"]["mode"]
-            if (
-                mode == "Unrated"
-                and len(self.competitive_matches_id) + len(self.unrated_matches_id) < 10
-            ):
-                self.unrated_matches_id.append(match["meta"]["id"])
+            if total_matches < 10:
+                if mode == "Competitive":
+                    self.competitive_matches_id.append(match_id)
+                elif mode == "Unrated":
+                    self.unrated_matches_id.append(match_id)
+                else:
+                    continue
+
                 self.match_stats.update_stats(match)
+                total_matches += 1
+            else:
+                break
 
         return self.match_stats.get_summary()
 
