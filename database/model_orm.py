@@ -2,6 +2,7 @@ from tortoise.exceptions import IntegrityError
 from database.database import BaseOrm
 from database.models import UserInfo, ValorantAccount, ValorantMatch
 from tortoise.transactions import atomic
+from tortoise.transactions import in_transaction
 from tortoise.exceptions import DoesNotExist
 
 
@@ -107,13 +108,17 @@ class ValorantAccountOrm(BaseOrm):
         existing_entry = await self._model.filter(valorant_puuid=valorant_puuid).first()
         return existing_entry is not None
 
-    @atomic()
     async def remove_valorant_account(self, valorant_account: str):
-        account = await self._model.filter(valorant_account=valorant_account).first()
-        if not account:
-            raise DoesNotExist(f"Valorant account {valorant_account} does not exist.")
-        await account.delete()
-        print(f"Valorant account {valorant_account} removed successfully.")
+        async with in_transaction():
+            account = await self._model.filter(
+                valorant_account=valorant_account
+            ).first()
+            if not account:
+                raise DoesNotExist(
+                    f"Valorant account {valorant_account} does not exist."
+                )
+            await account.delete()
+            print(f"Valorant account {valorant_account} removed successfully.")
 
 
 class MatchOrm(BaseOrm):
