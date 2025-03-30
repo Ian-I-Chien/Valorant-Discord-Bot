@@ -84,6 +84,7 @@ async def rank(interaction: discord.Interaction):
 
 @bot.tree.command(name="info", description="Player Information")
 async def info(interaction: discord.Interaction, player_full_name: str):
+    polling_matches.stop()
     player_name, player_tag = await parse_player_name(interaction, player_full_name)
     if not player_name or not player_tag:
         return
@@ -99,10 +100,12 @@ async def info(interaction: discord.Interaction, player_full_name: str):
         return
 
     await interaction.edit_original_response(content=None, embed=player_info)
+    polling_matches.start()
 
 
 @bot.tree.command(name="lm", description="Last Match Information")
 async def lastmatch(interaction: discord.Interaction, player_full_name: str):
+    polling_matches.stop()
     player_name, player_tag = await parse_player_name(interaction, player_full_name)
     if not player_name or not player_tag:
         return
@@ -118,6 +121,7 @@ async def lastmatch(interaction: discord.Interaction, player_full_name: str):
         return
 
     await interaction.edit_original_response(content=None, embed=last_match)
+    polling_matches.start()
 
 
 @bot.tree.command(
@@ -125,12 +129,16 @@ async def lastmatch(interaction: discord.Interaction, player_full_name: str):
 )
 @app_commands.describe(valorant_account="valorant account with hashtag. ex:user#1234")
 async def reg_val(interaction: discord.Interaction, valorant_account: str):
+    polling_matches.stop()
     await registered_with_valorant_account(interaction, valorant_account)
+    polling_matches.start()
 
 
 @bot.tree.command(name="del_val", description="Delete Valorant User")
 async def del_val(interaction: discord.Interaction, valorant_account: str):
+    polling_matches.stop()
     await delete_valorant_account(interaction, valorant_account)
+    polling_matches.start()
 
 
 @bot.event
